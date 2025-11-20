@@ -5,39 +5,37 @@ import * as cheerio from "cheerio";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ID Facebook
+// Facebook profile ID
 const FB_PROFILE_ID = "61577926411770";
 
-// Lấy HTML từ mbasic.facebook.com
+// ==============================
+// FETCH FACEBOOK VIA SCRAPERAPI
+// ==============================
 async function fetchFacebookHTML() {
-  const url = `https://mbasic.facebook.com/profile.php?id=${FB_PROFILE_ID}`;
+  const SCRAPER_API_KEY = "84c0bdaa20ad21e3925d0604da7a8221";
 
-  const res = await fetch(url, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36",
-      "Accept-Language": "en-US,en;q=0.9",
-      "Accept":
-        "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-      "Cache-Control": "no-cache",
-      "Upgrade-Insecure-Requests": "1",
-      "Pragma": "no-cache",
-      "Connection": "keep-alive"
-    }
-  });
+  const target = `https://mbasic.facebook.com/profile.php?id=${FB_PROFILE_ID}`;
+  const url =
+    `http://api.scraperapi.com?api_key=${SCRAPER_API_KEY}&url=` +
+    encodeURIComponent(target);
+
+  const res = await fetch(url);
 
   if (!res.ok) {
-    throw new Error(`Fetch FB failed: ${res.status}`);
+    throw new Error(`Fetch FB failed via ScraperAPI: ${res.status}`);
   }
 
   return await res.text();
 }
 
-// Parse bài viết
+// ==============================
+// PARSE POSTS
+// ==============================
 function parsePosts(html) {
   const $ = cheerio.load(html);
   const posts = [];
 
+  // mbasic dùng link story.php
   $('a[href*="story.php"]').each((i, el) => {
     if (posts.length >= 10) return;
 
@@ -60,7 +58,9 @@ function parsePosts(html) {
   return posts;
 }
 
-// Tạo RSS XML
+// ==============================
+// BUILD RSS XML
+// ==============================
 function buildRSS(posts) {
   const escapeXML = (str = "") =>
     str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -83,13 +83,15 @@ function buildRSS(posts) {
 <channel>
   <title>Facebook Profile Feed</title>
   <link>https://www.facebook.com/profile.php?id=${FB_PROFILE_ID}</link>
-  <description>Bài viết mới từ Facebook</description>
+  <description>Bài viết mới từ Facebook (Scraped via ScraperAPI)</description>
   ${itemsXml}
 </channel>
 </rss>`;
 }
 
-// Endpoint chính
+// ==============================
+// MAIN ENDPOINT /feed.xml
+// ==============================
 app.get("/feed.xml", async (req, res) => {
   try {
     const html = await fetchFacebookHTML();
@@ -104,11 +106,14 @@ app.get("/feed.xml", async (req, res) => {
   }
 });
 
-// Trang test
+// ==============================
+// HOME PAGE
+// ==============================
 app.get("/", (req, res) => {
   res.send("RSS FB Dong Ninh Hoa 24h is running. Use /feed.xml");
 });
 
+// ==============================
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
