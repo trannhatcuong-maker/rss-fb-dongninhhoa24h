@@ -72,4 +72,43 @@ function buildRSS(posts) {
       <title>${escapeXML(p.title)}</title>
       <link>${escapeXML(p.link)}</link>
       <description>${escapeXML(p.description)}</description>
-      <pubDate>${p.pubDate}</
+      <pubDate>${p.pubDate}</pubDate>
+      <guid>${escapeXML(p.link)}</guid>
+    </item>`
+    )
+    .join("\n");
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+  <title>Facebook Profile Feed</title>
+  <link>https://www.facebook.com/profile.php?id=${FB_PROFILE_ID}</link>
+  <description>Bài viết mới từ Facebook</description>
+  ${itemsXml}
+</channel>
+</rss>`;
+}
+
+// Endpoint chính
+app.get("/feed.xml", async (req, res) => {
+  try {
+    const html = await fetchFacebookHTML();
+    const posts = parsePosts(html);
+    const rss = buildRSS(posts);
+
+    res.set("Content-Type", "application/rss+xml; charset=utf-8");
+    res.send(rss);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error generating RSS");
+  }
+});
+
+// Trang test
+app.get("/", (req, res) => {
+  res.send("RSS FB Dong Ninh Hoa 24h is running. Use /feed.xml");
+});
+
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});
