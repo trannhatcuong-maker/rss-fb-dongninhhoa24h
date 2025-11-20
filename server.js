@@ -14,9 +14,13 @@ async function fetchFacebookHTML() {
   const url = `https://mbasic.facebook.com/profile.php?id=${FB_PROFILE_ID}`;
   const res = await fetch(url, {
     headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
-    },
+  "User-Agent":
+    "Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36",
+  "Accept-Language": "en-US,en;q=0.9",
+  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  "Cache-Control": "no-cache",
+  "Upgrade-Insecure-Requests": "1"
+},
   });
 
   if (!res.ok) {
