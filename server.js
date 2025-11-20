@@ -34,13 +34,12 @@ function parsePosts(html) {
   const $ = cheerio.load(html);
   const posts = [];
 
-  // FB mobile dùng link "story.php" cho từng bài
+  // mbasic.facebook.com dùng link dạng: /story.php?story_fbid=xxx&id=xxx
   $('a[href*="story.php"]').each((i, el) => {
-    if (posts.length >= 10) return; // tối đa 10 bài
+    if (posts.length >= 10) return;
 
-    const $a = $(el);
-    const href = $a.attr("href") || "";
-    const text = $a.text().trim();
+    const href = $(el).attr("href") || "";
+    const text = $(el).text().trim();
 
     if (!href.includes("story.php")) return;
     if (!text) return;
@@ -48,15 +47,16 @@ function parsePosts(html) {
     const link = "https://www.facebook.com" + href;
 
     posts.push({
-      title: text.slice(0, 80), // cắt bớt cho gọn
-      link,
+      title: text.slice(0, 80),
+      link: link,
       description: text,
-      pubDate: new Date().toUTCString(), // tạm dùng thời gian crawl
+      pubDate: new Date().toUTCString(),
     });
   });
 
   return posts;
 }
+
 
 // Tạo RSS XML từ danh sách bài
 function buildRSS(posts) {
