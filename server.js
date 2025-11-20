@@ -11,7 +11,7 @@ const FB_PROFILE_ID = "61577926411770";
 
 // Hàm lấy HTML trang mobile của Facebook
 async function fetchFacebookHTML() {
-  const url = `https://m.facebook.com/profile.php?id=${FB_PROFILE_ID}&v=timeline`;
+  const url = `https://mbasic.facebook.com/profile.php?id=${FB_PROFILE_ID}`;
   const res = await fetch(url, {
     headers: {
       "User-Agent":
